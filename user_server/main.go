@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ESRS/api"
-	"ESRS/middleware"
+	"ESRS/user_server/api"
+	"ESRS/user_server/middleware"
 	"os"
 
 	"github.com/gin-gonic/gin"

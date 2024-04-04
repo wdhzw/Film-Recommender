@@ -1,4 +1,4 @@
-module ESRS
+module ESRS/user_server
 
 go 1.20
 
