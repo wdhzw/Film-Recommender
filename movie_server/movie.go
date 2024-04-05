@@ -3,6 +3,7 @@ package movie_server
 import (
 	"CS5224_ESRS/movie/model"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 const (
@@ -17,13 +18,14 @@ var (
 
 func GetMovieDetailsById(c *gin.Context) {
 
-	movieId := c.GetInt64("movie_id")
+	movieIdStr := c.GetString("movie_id")
 
-	if movieId == 0 {
+	if movieIdStr == "" {
 		returnError(c, 200, ErrorMovieIdInvalid, "MovieId is empty, please check your system")
 		return
 	}
 
+	movieId, _ := strconv.ParseInt(movieIdStr, 10, 64)
 	movie, err := MovieModel.GetMovieModelById(movieId)
 	if err != nil {
 		returnError(c, 500, InternalError, "DB has some unexpected errors, please contact with developers to check")
@@ -44,7 +46,59 @@ func GetMovieDetailsById(c *gin.Context) {
 }
 
 func GetPopularMovies(c *gin.Context) {
+	page := c.GetInt("page")
 
+	movies, err := MovieModel.GetPopularMovies(page)
+	if err != nil {
+		returnError(c, 500, InternalError, "DB has some unexpected errors, please contact with developers to check")
+		return
+	}
+
+	total, err := MovieModel.CountTotalMovies()
+	if err != nil {
+		returnError(c, 500, InternalError, "DB has some unexpected errors, please contact with developers to check")
+		return
+	}
+
+	// 计算总页数
+	totalPages := total / int64(10)
+	if total/int64(10) != 0 {
+		totalPages++
+	}
+
+	c.JSON(200, gin.H{
+		"content": movies,
+		"total":   totalPages,
+	})
+	return
+}
+
+func GetHighRateMovies(c *gin.Context) {
+	page := c.GetInt("page")
+
+	movies, err := MovieModel.GetHighRateMovies(page)
+	if err != nil {
+		returnError(c, 500, InternalError, "DB has some unexpected errors, please contact with developers to check")
+		return
+	}
+
+	total, err := MovieModel.CountTotalMovies()
+	if err != nil {
+		returnError(c, 500, InternalError, "DB has some unexpected errors, please contact with developers to check")
+		return
+	}
+
+	// 计算总页数
+	totalPages := total / int64(10)
+	if total/int64(10) != 0 {
+		totalPages++
+	}
+
+	c.JSON(200, gin.H{
+		"content": movies,
+		"total":   totalPages,
+	})
+	return
 }
 
 func Search(c *gin.Context) {
@@ -53,6 +107,28 @@ func Search(c *gin.Context) {
 
 // UpdateMovieMeta only update movie_server rate and popularity
 func UpdateMovieMeta(c *gin.Context) {
+	movieIdStr := c.GetString("movie_id")
+
+	if movieIdStr == "" {
+		returnError(c, 200, ErrorMovieIdInvalid, "MovieId is empty, please check your system")
+		return
+	}
+
+	movieId, _ := strconv.ParseInt(movieIdStr, 10, 64)
+
+	rateStr := c.GetString("rate")
+	popularityStr := c.GetString("popularity")
+	rate, _ := strconv.ParseFloat(rateStr, 64)
+	popularity, _ := strconv.ParseFloat(popularityStr, 64)
+
+	err := MovieModel.UpdateMovies(movieId, popularity, rate)
+	if err != nil {
+		returnError(c, 500, InternalError, "DB has some unexpected errors, please contact with developers to check")
+		return
+	}
+
+	returnOK(c, "ok")
+	return
 }
 
 func returnError(c *gin.Context, status int, businessErrorCode int, message string) {

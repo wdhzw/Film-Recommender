@@ -37,6 +37,64 @@ func InitMovie() *MovieProxy {
 
 func (p *MovieProxy) GetMovieModelById(movieId int64) (*MovieModel, error) {
 	var movie *MovieModel
-	movie_server.Mysql.Where("movie_id = ?", movieId).First(&movie)
+	err := movie_server.Mysql.Model(&MovieModel{}).Where("movie_id = ?", movieId).First(&movie).Error
+	if err != nil {
+		return nil, err
+	}
 	return movie, nil
+}
+
+func (p *MovieProxy) GetPopularMovies(page int) ([]*MovieModel, error) {
+	movies := make([]*MovieModel, 0)
+	offset := (page - 1) * 10
+
+	err := movie_server.Mysql.Model(&MovieModel{}).Order("popularity DESC").
+		Limit(10).
+		Offset(offset).
+		Find(&movies).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return movies, nil
+}
+
+func (p *MovieProxy) CountTotalMovies() (total int64, err error) {
+	err = movie_server.Mysql.Model(&MovieModel{}).Count(&total).Error
+	if err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+func (p *MovieProxy) GetHighRateMovies(page int) ([]*MovieModel, error) {
+	movies := make([]*MovieModel, 0)
+	offset := (page - 1) * 10
+
+	err := movie_server.Mysql.Model(&MovieModel{}).Order("rate DESC").
+		Limit(10).
+		Offset(offset).
+		Find(&movies).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return movies, nil
+}
+
+func (p *MovieProxy) SearchMovies(page int) ([]*MovieModel, error) {
+	return nil, nil
+}
+
+func (p *MovieProxy) UpdateMovies(movieId int64, popularity, rate float64) error {
+	err := movie_server.Mysql.Model(&MovieModel{}).
+		Where("movie_id = ? ", movieId).
+		UpdateColumns(map[string]interface{}{
+			"popularity": popularity,
+			"rate":       rate,
+		}).Error
+
+	return err
 }
