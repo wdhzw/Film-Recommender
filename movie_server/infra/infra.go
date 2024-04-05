@@ -1,4 +1,4 @@
-package movie_server
+package infra
 
 import (
 	"fmt"
@@ -11,8 +11,9 @@ var (
 )
 
 func InitMysql() {
-	dsn := "guohaonan:ghn980421@tcp(cs5224-movie_server-meta.c3o8o8eyqv2b.us-east-1.rds.amazonaws.com:3306)/movie?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "guohaonan:ghn980421@tcp(cs5224-movie-meta.c3o8o8eyqv2b.us-east-1.rds.amazonaws.com:3306)/movie?charset=utf8mb4&parseTime=True&loc=Local"
 	var err error
+
 	Mysql, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {

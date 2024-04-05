@@ -1,7 +1,7 @@
 package model
 
 import (
-	"CS5224_ESRS/movie"
+	"CS5224_ESRS/movie/infra"
 	"time"
 )
 
@@ -10,8 +10,8 @@ type MovieModel struct {
 	MovieID           int64     `gorm:"column:movie_id" json:"movie_id"`
 	Title             string    `gorm:"column:title" json:"title"`
 	Overview          string    `gorm:"column:overview" json:"overview"`
-	Rate              float32   `gorm:"column:rate" json:"rate"`
-	Popularity        float32   `gorm:"column:popularity" json:"popularity"`
+	Rate              float64   `gorm:"column:rate" json:"rate"`
+	Popularity        float64   `gorm:"column:popularity" json:"popularity"`
 	Homepage          string    `gorm:"column:homepage" json:"homepage"`
 	PosterURI         string    `gorm:"column:poster_uri" json:"poster_uri"`
 	Actors            []byte    `gorm:"column:actors" json:"actors"`
@@ -37,7 +37,7 @@ func InitMovie() *MovieProxy {
 
 func (p *MovieProxy) GetMovieModelById(movieId int64) (*MovieModel, error) {
 	var movie *MovieModel
-	err := movie_server.Mysql.Model(&MovieModel{}).Where("movie_id = ?", movieId).First(&movie).Error
+	err := infra.Mysql.Model(&MovieModel{}).Where("movie_id = ?", movieId).Find(&movie).Error
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (p *MovieProxy) GetPopularMovies(page int) ([]*MovieModel, error) {
 	movies := make([]*MovieModel, 0)
 	offset := (page - 1) * 10
 
-	err := movie_server.Mysql.Model(&MovieModel{}).Order("popularity DESC").
+	err := infra.Mysql.Model(&MovieModel{}).Order("popularity DESC").
 		Limit(10).
 		Offset(offset).
 		Find(&movies).Error
@@ -61,7 +61,7 @@ func (p *MovieProxy) GetPopularMovies(page int) ([]*MovieModel, error) {
 }
 
 func (p *MovieProxy) CountTotalMovies() (total int64, err error) {
-	err = movie_server.Mysql.Model(&MovieModel{}).Count(&total).Error
+	err = infra.Mysql.Model(&MovieModel{}).Count(&total).Error
 	if err != nil {
 		return 0, err
 	}
@@ -72,7 +72,7 @@ func (p *MovieProxy) GetHighRateMovies(page int) ([]*MovieModel, error) {
 	movies := make([]*MovieModel, 0)
 	offset := (page - 1) * 10
 
-	err := movie_server.Mysql.Model(&MovieModel{}).Order("rate DESC").
+	err := infra.Mysql.Model(&MovieModel{}).Order("rate DESC").
 		Limit(10).
 		Offset(offset).
 		Find(&movies).Error
@@ -89,7 +89,7 @@ func (p *MovieProxy) SearchMovies(page int) ([]*MovieModel, error) {
 }
 
 func (p *MovieProxy) UpdateMovies(movieId int64, popularity, rate float64) error {
-	err := movie_server.Mysql.Model(&MovieModel{}).
+	err := infra.Mysql.Model(&MovieModel{}).
 		Where("movie_id = ? ", movieId).
 		UpdateColumns(map[string]interface{}{
 			"popularity": popularity,
