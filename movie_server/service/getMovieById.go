@@ -10,9 +10,9 @@ import (
 )
 
 type Actor struct {
-	Name       string `json:"name"`
-	Character  string `json:"character"`
-	ProfileUri string `json:"profile_uri"`
+	Name       string `json:"name" form:"movie_id"`
+	Character  string `json:"character" form:"movie_id"`
+	ProfileUri string `json:"profile_uri" form:"movie_id"`
 }
 
 type MovieDetails struct {

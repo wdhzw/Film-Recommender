@@ -13,3 +13,7 @@ func FillURI(uri string) string {
 func SplitSeries(str string) []string {
 	return strings.Split(str, ",")
 }
+
+func JointSeries(strs []string) string {
+	return strings.Join(strs, ",")
+}

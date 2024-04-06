@@ -1,0 +1,4 @@
+github.com/aws/aws-lambda-go v1.46.0 h1:UWVnvh2h2gecOlFhHQfIPQcD8pL/f7pVCutmFl+oXU8=
+github.com/aws/aws-lambda-go v1.46.0/go.mod h1:dpMpZgvWx5vuQJfBt0zqBha60q7Dd7RfgJv23DymV8A=
+github.com/ryanbradynd05/go-tmdb v0.0.0-20230108222638-2a68dc6ff40c h1:TJP+nrMt7riGqrsnD3pGnF6/YW4r5WZ9cHFIJwCWJxQ=
+github.com/ryanbradynd05/go-tmdb v0.0.0-20230108222638-2a68dc6ff40c/go.mod h1:k/112WTJ3EoR7wjhtx8kOXO22CKNvJy+rNzGPXnuEsI=

@@ -10,6 +10,7 @@ const (
 
 	ErrorMovieIdInvalid         int = 10002
 	ErrorUpdateMovieFormInvalid int = 10003
+	ErrorCreateMovieFormInvalid int = 10004
 )
 
 var (

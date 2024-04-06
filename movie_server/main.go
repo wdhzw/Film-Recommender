@@ -20,6 +20,7 @@ func main() {
 	r.GET("/movie_server/top_rate", service.GetHighRateMovies)
 	r.GET("/movie_server/search", service.Search)
 	r.POST("/movie_server/update", service.UpdateMovieMeta)
+	r.POST("/movie_server/create", service.CreateMovie)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }

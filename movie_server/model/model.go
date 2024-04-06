@@ -98,3 +98,7 @@ func (p *MovieProxy) UpdateMovies(movieId int64, popularity, rate float64) error
 
 	return err
 }
+
+func (p *MovieProxy) CreateMovie(model *MovieModel) error {
+	return infra.Mysql.Model(&MovieModel{}).Create(model).Error
+}
