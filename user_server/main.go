@@ -1,10 +1,10 @@
 package main
 
 import (
-	"ESRS/user_server/api"
-	"ESRS/user_server/middleware"
 	"os"
 
+	"ESRS/user_server/api"
+	"ESRS/user_server/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +23,8 @@ func main() {
 
 	public := r.Group("/api")
 	{
-		public.POST("/user_login", api.UserLogin)
+		public.POST("/user_sign_up", api.UserSignUp)
+		public.POST("/confirm_user_sign_up", api.ConfirmUserSignUp)
+		public.POST("/user_login", api.UserLogIn)
 	}
-
 }
