@@ -11,6 +11,7 @@ function LoginPage() {
     padding: '40px',
     height: '250px',
     width: '400px',
+    margin: '0 auto',
     border: '1px solid #f0f0f0',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     borderRadius: '12px',
@@ -56,6 +57,7 @@ function LoginPage() {
         name="basic"
         initialValues={{ remember: true }}
         autoComplete="off"
+        style={{width: '80%', margin: '0 auto'}}
       >
         <Title level={2}>Login</Title>
         <Form.Item
@@ -92,6 +94,7 @@ function LoginPage() {
           name="register"
           initialValues={{ remember: true }}
           autoComplete="off"
+          style={{width: '70%', margin: '0 auto'}}
         >
           <Form.Item
             label="Email"
