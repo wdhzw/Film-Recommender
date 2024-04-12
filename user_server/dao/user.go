@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"ESRS/user_server/client"
@@ -25,7 +26,12 @@ type UserTableDao interface {
 	GetByUID(ctx context.Context, userID string) (*entity.UserTable, error)
 	Create(ctx context.Context, userName, email string) (string, error)
 	GetByEmail(ctx context.Context, email string) (*entity.UserTable, error)
-	//Update(ctx context.Context, updateParams *VODRecordUpdateParams) (int64, error)
+	Update(ctx context.Context, params UpdateUserParams) error
+}
+
+type UpdateUserParams struct {
+	UID            string
+	PreferredGenre []string
 }
 
 type userTableDynamoDAO struct {
@@ -58,7 +64,7 @@ func (dao *userTableDynamoDAO) Create(ctx context.Context, userName string, emai
 
 	marshaledItem, err := dynamodbattribute.MarshalMap(item)
 	if err != nil {
-		log.Fatalf("[userTableDynamoDAO-Create] Got error marshalling new movie item: %s", err)
+		log.Printf("[userTableDynamoDAO-Create] Got error marshalling new movie item: %s", err)
 		return "", err
 	}
 
@@ -67,7 +73,7 @@ func (dao *userTableDynamoDAO) Create(ctx context.Context, userName string, emai
 		Item:      marshaledItem,
 	})
 	if putItemErr != nil {
-		log.Fatalf("[userTableDynamoDAO-Create] Got error calling PutItem: %s", err)
+		log.Printf("[userTableDynamoDAO-Create] Got error calling PutItem: %s", err)
 		return "", putItemErr
 	}
 	return item.UserID, nil
@@ -79,7 +85,7 @@ func (dao *userTableDynamoDAO) GetByUID(ctx context.Context, userID string) (*en
 
 	expr, err := expression.NewBuilder().WithFilter(filter).Build()
 	if err != nil {
-		log.Fatalf("[userTableDynamoDAO-GetByUID] Got error building expression: %s", err)
+		log.Printf("[userTableDynamoDAO-GetByUID] Got error building expression: %s", err)
 		return nil, err
 	}
 
@@ -93,7 +99,7 @@ func (dao *userTableDynamoDAO) GetByUID(ctx context.Context, userID string) (*en
 
 	result, err := dbClient.Scan(params)
 	if err != nil {
-		log.Fatalf("[userTableDynamoDAO-GetByUID] Query API call failed: %s", err)
+		log.Printf("[userTableDynamoDAO-GetByUID] Query API call failed: %s", err)
 		return nil, err
 	}
 
@@ -102,7 +108,7 @@ func (dao *userTableDynamoDAO) GetByUID(ctx context.Context, userID string) (*en
 		err = dynamodbattribute.UnmarshalMap(i, &item)
 
 		if err != nil {
-			log.Fatalf("[userTableDynamoDAO-GetByUID] Got error unmarshalling: %s", err)
+			log.Printf("[userTableDynamoDAO-GetByUID] Got error unmarshalling: %s", err)
 			return nil, err
 		}
 		return &item, nil
@@ -117,7 +123,7 @@ func (dao *userTableDynamoDAO) GetByEmail(ctx context.Context, email string) (*e
 
 	expr, err := expression.NewBuilder().WithFilter(filter).Build()
 	if err != nil {
-		log.Fatalf("[userTableDynamoDAO-GetByEmail] Got error building expression: %s", err)
+		log.Printf("[userTableDynamoDAO-GetByEmail] Got error building expression: %s", err)
 		return nil, err
 	}
 
@@ -131,7 +137,7 @@ func (dao *userTableDynamoDAO) GetByEmail(ctx context.Context, email string) (*e
 
 	result, err := dbClient.Scan(params)
 	if err != nil {
-		log.Fatalf("[userTableDynamoDAO-GetByEmail] Query API call failed: %s", err)
+		log.Printf("[userTableDynamoDAO-GetByEmail] Query API call failed: %s", err)
 		return nil, err
 	}
 
@@ -140,13 +146,51 @@ func (dao *userTableDynamoDAO) GetByEmail(ctx context.Context, email string) (*e
 		err = dynamodbattribute.UnmarshalMap(i, &item)
 
 		if err != nil {
-			log.Fatalf("[userTableDynamoDAO-GetByEmail] Got error unmarshalling: %s", err)
+			log.Printf("[userTableDynamoDAO-GetByEmail] Got error unmarshalling: %s", err)
 			return nil, err
 		}
 		return &item, nil
 	}
 
 	return nil, nil
+}
+
+func (dao *userTableDynamoDAO) Update(ctx context.Context, params UpdateUserParams) error {
+	dbClient := client.GetDynamoDBClient()
+	marshaledGenreList, err := dynamodbattribute.MarshalList(params.PreferredGenre)
+	if err != nil {
+		log.Printf("[userTableDynamoDAO-Update] Got error marshalling preferred genres: %s", err)
+		return err
+	}
+
+	nowUnix := time.Now().Unix()
+	// Construct the update input
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String(UserTable),
+		Key: map[string]*dynamodb.AttributeValue{
+			"user_id": {
+				S: aws.String(params.UID),
+			},
+		},
+		UpdateExpression: aws.String("set preferred_genre = :g, update_time = :t"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":g": {
+				L: marshaledGenreList,
+			},
+			":t": {
+				N: aws.String(strconv.FormatInt(nowUnix, 10)),
+			},
+		},
+		ReturnValues: aws.String("UPDATED_NEW"),
+	}
+
+	_, err = dbClient.UpdateItem(input)
+	if err != nil {
+		log.Printf("[userTableDynamoDAO-Update] Got error updating item: %s", err)
+		return err
+	}
+
+	return nil
 }
 
 func generateUserID(username string) string {

@@ -33,6 +33,7 @@ func main() {
 		public.POST("/user_sign_up", api.UserSignUp)
 		public.POST("/confirm_user_sign_up", api.ConfirmUserSignUp)
 		public.POST("/user_login", api.UserLogIn)
+		public.POST("/update_user_genre", api.UpdateUserGenre)
 	}
 
 	r.Run(":" + os.Getenv("PORT"))
