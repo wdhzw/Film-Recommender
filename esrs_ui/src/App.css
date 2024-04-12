@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+body {
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+}
+
+
+.ant-modal-title {
+  text-align: center;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
