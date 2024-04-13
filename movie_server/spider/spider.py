@@ -138,16 +138,19 @@ def save_to_csv(movies):
 
 
 if __name__ == '__main__':
-    s3 = boto3.resource(
-        service_name='s3',
-        aws_access_key_id="AKIA47CRYK4VYOFU3AWF",
-        aws_secret_access_key="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",
-        region_name="us-east-1"
-    )
-    page_num = 600
-    movies_lists = crawl_movies(501, page_num)
-    movies = parse_movies(movies_lists)
-    save_to_csv(movies)
-    s3.Bucket('cs5224-movie').upload_file(Filename='movies.csv',
-                                          Key="movie_data/movies_{}.csv".format(int(datetime.now().timestamp())))
-    print("finish one file")
+    # s3 = boto3.resource(
+    #     service_name='s3',
+    #     aws_access_key_id="AKIA47CRYK4VYOFU3AWF",
+    #     aws_secret_access_key="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",
+    #     region_name="us-east-1"
+    # )
+    # page_num = 600
+    # movies_lists = crawl_movies(501, page_num)
+    # movies = parse_movies(movies_lists)
+    # save_to_csv(movies)
+    # s3.Bucket('cs5224-movie').upload_file(Filename='movies.csv',
+    #                                       Key="movie_data/movies_{}.csv".format(int(datetime.now().timestamp())))
+    # print("finish one file")
+
+    resp = tmdb.Genres().movie_list()
+    print(resp)

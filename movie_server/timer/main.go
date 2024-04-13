@@ -2,14 +2,16 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
 	"io"
+	"log"
 	"strconv"
+	"sync"
 	"time"
 
-	//"github.com/aws/aws-lambda-go/lambda"
 	"github.com/ryanbradynd05/go-tmdb"
 	"net/http"
 )
@@ -59,36 +61,38 @@ type CreateMovieRequest struct {
 	Keywords            []string  `form:"keywords"`
 }
 
-func fetchMovies() {
-
+func fetchMovies(ctx context.Context) (string, error) {
+	log.Println("start executing")
+	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		start, end := i*50+1, (i+1)*50
-
-		go func(start, end int) {
-
+		wg.Add(1)
+		go func(ctx context.Context, start, end int) {
+			defer wg.Done()
 			for j := start; j <= end; j++ {
+				log.Println("fetch popular movie")
 				resp, err := tmdbAPI.GetMoviePopular(map[string]string{
-					"page": string(rune(j)),
+					"page": strconv.Itoa(j),
 				})
-
+				log.Println("fetch done")
 				if err != nil {
-					fmt.Errorf("[GetMoviePopular] failed, err:%s", err)
+					log.Println("[GetMoviePopular] failed, err:%s", err)
 					continue
 				}
 
 				movies := resp.Results
-
+				log.Printf("movie list length:%d", len(movies))
 				for _, movie := range movies {
 					movieId := movie.ID
 					movieDetail, err := tmdbAPI.GetMovieInfo(movieId, nil)
 					if err != nil {
-						fmt.Errorf("[GetMovieInfo] failed, err:%s", err)
+						log.Printf("[GetMovieInfo] failed, err:%s", err)
 						continue
 					}
 
-					resp, err := http.Get(fmt.Sprintf("http://localhost:8080/movie_server/%d", movieId))
+					resp, err := http.Get(fmt.Sprintf("http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/%d", movieId))
 					if err != nil {
-						fmt.Errorf("[GetMovieInfo] failed, err:%s", err)
+						log.Printf("[GetMovieInfo] failed, err:%s", err)
 						continue
 					}
 					defer resp.Body.Close()
@@ -96,7 +100,7 @@ func fetchMovies() {
 					// 读取响应体
 					body, err := io.ReadAll(resp.Body)
 					if err != nil {
-						fmt.Errorf("[movie server] Get movie api failed, err:%s", err)
+						log.Println("[movie server] Get movie api failed, err:%s", err)
 						continue
 					}
 
@@ -122,7 +126,7 @@ func fetchMovies() {
 						// actors
 						creditResp, err := tmdbAPI.GetMovieCredits(movieId, nil)
 						if err != nil {
-							fmt.Errorf("[movie server] Get Movie Credit api failed, err:%s", err)
+							log.Println("[movie server] Get Movie Credit api failed, err:%s", err)
 							continue
 						}
 
@@ -185,7 +189,7 @@ func fetchMovies() {
 						// keywords
 						keywordResp, err := tmdbAPI.GetMovieKeywords(movieId, nil)
 						if err != nil {
-							fmt.Errorf("[movie server] Get Movie Keywords api failed, err:%s", err)
+							log.Println("[movie server] Get Movie Keywords api failed, err:%s", err)
 							continue
 						}
 						keywords := make([]string, 0)
@@ -195,9 +199,9 @@ func fetchMovies() {
 						createReq.Keywords = keywords
 
 						createReqStr, _ := json.Marshal(createReq)
-						_, err = http.Post("http://localhost:8080/movie_server/create", "application/json", bytes.NewBuffer(createReqStr))
+						_, err = http.Post("http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/create", "application/json", bytes.NewBuffer(createReqStr))
 						if err != nil {
-							fmt.Errorf("[movie server] Create Movie Api Failed, err:%s", err)
+							log.Println("[movie server] Create Movie Api Failed, err:%s", err)
 							continue
 						}
 					} else {
@@ -207,9 +211,9 @@ func fetchMovies() {
 							Rate:       strconv.FormatFloat(float64(movie.VoteAverage), 'f', -1, 64),
 						}
 						updateReqStr, _ := json.Marshal(updateReq)
-						_, err := http.Post("http://localhost:8080/movie_server/update", "application/json", bytes.NewBuffer(updateReqStr))
+						_, err := http.Post("http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/update", "application/json", bytes.NewBuffer(updateReqStr))
 						if err != nil {
-							fmt.Errorf("[movie server] Update Movie Api Failed, err:%s", err)
+							log.Println("[movie server] Update Movie Api Failed, err:%s", err)
 							continue
 						}
 					}
@@ -217,12 +221,65 @@ func fetchMovies() {
 				}
 
 			}
-		}(start, end)
+		}(ctx, start, end)
 	}
-
+	wg.Wait()
+	log.Println("done")
+	return "Done", nil
 }
+
+//type Event struct {
+//	EventType string `json:"event_type"`
+//}
+//
+//func Schedule(ctx context.Context, event *Event) (int, error) {
+//	switch event.EventType {
+//	case "public":
+//		return TestHttpsInPublicNet()
+//	case "private":
+//		return TestHttpInPrivateNet()
+//	}
+//	return -1, fmt.Errorf("event type wrong")
+//}
+//
+//func TestHttpInPrivateNet() (int, error) {
+//	resp, err := http.Get(fmt.Sprintf("http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/%d", 823464))
+//	if err != nil {
+//		log.Printf("[GetMovieInfo] failed, err:%s", err)
+//		return 0, err
+//	}
+//	defer resp.Body.Close()
+//
+//	// 读取响应体
+//	body, err := io.ReadAll(resp.Body)
+//	if err != nil {
+//		log.Println("[movie server] Get movie api failed, err:%s", err)
+//		return 0, err
+//	}
+//
+//	content := &MovieContent{}
+//	_ = json.Unmarshal(body, content)
+//	log.Printf("Movie id:%d", content.Content.MovieId)
+//	return int(content.Content.MovieId), err
+//}
+//
+//func TestHttpsInPublicNet() (int, error) {
+//	log.Println("fetch popular movie")
+//	resp, err := tmdbAPI.GetMoviePopular(map[string]string{
+//		"page": strconv.Itoa(1),
+//	})
+//	log.Println("fetch done")
+//	if err != nil {
+//		log.Println("[GetMoviePopular] failed, err:%s", err)
+//		return -1, err
+//	}
+//
+//	movies := resp.Results
+//	return len(movies), nil
+//}
 
 func main() {
 	lambda.Start(fetchMovies)
-	//fetchMovies()
+	//fetchMovies(context.Background())
+	//lambda.Start(Schedule)
 }

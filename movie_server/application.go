@@ -2,6 +2,7 @@ package main
 
 import (
 	"CS5224_ESRS/movie/infra"
+	"CS5224_ESRS/movie/middleware"
 	"CS5224_ESRS/movie/service"
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +14,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(gin.Recovery())
+	r.Use(gin.Recovery(), middleware.CORSMiddleware())
 
 	r.GET("/movie_server/:movie_id", service.GetMovieDetailsById)
 	r.GET("/movie_server/popular", service.GetPopularMovies)
@@ -22,5 +23,5 @@ func main() {
 	r.POST("/movie_server/update", service.UpdateMovieMeta)
 	r.POST("/movie_server/create", service.CreateMovie)
 
-	r.Run(":5000") // listen and serve on 0.0.0.0:8080
+	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }
