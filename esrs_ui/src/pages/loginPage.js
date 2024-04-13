@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useState} from 'react';
-import { Form, Input, Button, Modal, Typography } from 'antd';
+import { Form, Input, Button, Modal, Typography, notification } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../hooks/AuthContext';
+import {confirmSignUp, getUserInfo, login, signUp} from '../api'
 
 const { Title } = Typography;
 
@@ -18,9 +19,20 @@ function LoginPage() {
     background: '#ffffff'
   }
 
+  const [api, contextHolder] = notification.useNotification();
+  const openNotificationWithIcon = (type, message, desc) => {
+    api[type]({
+      message: message,
+      description: desc,
+    });
+  };
+
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isVerifyCode, setIsVerifyCode] = useState(false)
+  const [verifyCode, setVerifyCode] = useState('')
   const { setAuthData } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -36,8 +48,24 @@ function LoginPage() {
     setIsModalVisible(true);
   };
 
-  const handleOk = () => {
-    setIsModalVisible(false);
+  const handleOk = async () => {
+    if (isVerifyCode === false) {
+      let signUpRes = await signUp(username, email, password)
+      if (signUpRes !== null && signUpRes.status_code === 0) {
+        setIsVerifyCode(true)
+        return
+      } else {
+        openNotificationWithIcon('error', 'Sign up failed!!', 'Password too simple!!!')
+      }
+    }
+    if (isVerifyCode === true && verifyCode !== '') {
+      let confirmSighUpRes = await confirmSignUp(username, email, verifyCode)
+      if (confirmSighUpRes !== null && confirmSighUpRes.status_code === 0) {
+        setIsModalVisible(false);
+        openNotificationWithIcon('success', 'Sign up successfully!!', 'Pls refresh and login!!!')
+      }
+    }
+
   };
 
   const handleCancel = () => {
@@ -46,13 +74,25 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    console.log(username)
-    setAuthData({ username });
-    navigate('/dashboard');
+    let loginRes = await login(username, email, password)
+    if (loginRes !== null && loginRes.status_code === 0) {
+      let userInfoRes = await getUserInfo(email)
+
+      if (userInfoRes !== null && userInfoRes.status_code === 0) {
+        let userInfo = userInfoRes.data
+        setAuthData({ userInfo });
+        navigate('/dashboard');
+      }
+
+    } else {
+      openNotificationWithIcon('error', 'Login Failed!!', 'Pls correct your username/password!!!')
+    }
+
   }
 
   return (
     <div style={loginFormStyle}>
+      {contextHolder}
       <Form
         name="basic"
         initialValues={{ remember: true }}
@@ -61,9 +101,9 @@ function LoginPage() {
       >
         <Title level={2}>Login</Title>
         <Form.Item
-          label="Email"
-          name="email"
-          rules={[{ required: true, message: 'Please input your email!' }]}
+          label="User Name"
+          name="username"
+          rules={[{ required: true, message: 'Please input your username!' }]}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         >
@@ -71,7 +111,17 @@ function LoginPage() {
         </Form.Item>
 
         <Form.Item
-          label="Pwd"
+          label="Email"
+          name="email"
+          rules={[{ required: true, message: 'Please input your email!' }]}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="Password"
           name="password"
           rules={[{ required: true, message: 'Please input your password!' }]}
           value={password}
@@ -97,9 +147,18 @@ function LoginPage() {
           style={{width: '70%', margin: '0 auto'}}
         >
           <Form.Item
+            label="User Name"
+            name="username"
+            rules={[{ required: true, message: 'Please input your username!' }]}
+            onChange={(e) => setUsername(e.target.value)}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
             label="Email"
             name="register_email"
             rules={[{ required: true, message: 'Please input your email!' }]}
+            onChange={(e) => setEmail(e.target.value)}
           >
             <Input />
           </Form.Item>
@@ -107,9 +166,22 @@ function LoginPage() {
             label="Password"
             name="register_password"
             rules={[{ required: true, message: 'Please input your password!' }]}
+            onChange={(e) => setPassword(e.target.value)}
           >
             <Input.Password />
           </Form.Item>
+          {
+            isVerifyCode ?
+                <Form.Item
+                  label="Verify Code"
+                  name="verifyCode"
+                  rules={[{ required: true, message: 'Please input the code from your mailbox!' }]}
+                  onChange={(e) => setVerifyCode(e.target.value)}
+                >
+                  <Input.Password />
+                </Form.Item> : null
+          }
+
         </Form>
       </Modal>
     </div>

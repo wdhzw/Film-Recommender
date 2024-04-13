@@ -5,6 +5,7 @@ import HomePage from "./pages/homePage";
 import PrivateRoute from "./pages/privateRoute";
 import DashboardPage from "./pages/dashboardPage";
 import DetailsPage from "./pages/detailsPage";
+import ProfilePage from "./pages/profilePage";
 
 function App() {
 
@@ -27,6 +28,14 @@ function App() {
                     element={
                         <PrivateRoute>
                             <DetailsPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path='/profile'
+                    element={
+                        <PrivateRoute>
+                            <ProfilePage />
                         </PrivateRoute>
                     }
                 />

@@ -1,7 +1,8 @@
 import React, {useContext} from 'react';
 import {LogoutOutlined, SettingOutlined, UserOutlined, LeftOutlined} from "@ant-design/icons";
-import {Avatar, Dropdown} from "antd";
+import {Avatar, Button, Dropdown} from "antd";
 import {AuthContext} from "../hooks/AuthContext";
+import {useLocation, useNavigate} from "react-router-dom";
 
 const fixedAvator = {
   position: 'fixed',
@@ -10,13 +11,31 @@ const fixedAvator = {
   zIndex: '1000',
 }
 
-function TopBar() {
+const fixedBack = {
+    position: 'fixed',
+    top: '30px',
+    left: '40px',
+    zIndex: '1000',
+}
+
+const fixedWelcome = {
+    position: 'fixed',
+    top: '10%',
+    left: '50%',
+    zIndex: '1000',
+    textAlign: 'center',
+    transform: 'translate(-50%, -50%)'
+}
+
+function TopBar({username, currentPage}) {
     const { logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const location = useLocation();
     const items = [
         {
             key: '1',
             label: (
-                <a target="_blank" rel="" href="">
+                <a rel="" href="/profile">
                   Profile
                 </a>
             ),
@@ -33,20 +52,30 @@ function TopBar() {
         },
     ];
 
+    const backToDashboard = (e) => {
+        navigate('/dashboard')
+    }
+
     return (
         <div>
             <Dropdown
-              menu={{
-                  items,
-              }}
-              placement="bottom"
-              arrow
+                menu={{
+                    items,
+                }}
+                placement="bottom"
+                arrow
             >
-                <Avatar style={fixedAvator} size={64} icon={<UserOutlined />} />
+                <Avatar style={fixedAvator} size={64} icon={<UserOutlined/>}/>
             </Dropdown>
-            <LeftOutlined style={{
-
-            }}/>
+            {
+                location.pathname.includes('movie') || location.pathname.includes('profile') ?
+                    <Button onClick={backToDashboard} style={fixedBack} type="text" icon={<LeftOutlined/>}>Back</Button>
+                    : null
+            }
+            <h1 style={fixedWelcome}>
+                Welcome {username}! <br/><br/>
+                {currentPage}
+            </h1>
         </div>
 
     )

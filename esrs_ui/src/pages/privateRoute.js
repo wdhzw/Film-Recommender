@@ -4,7 +4,7 @@ import { AuthContext } from '../hooks/AuthContext';
 
 const PrivateRoute = ({ children }) => {
   const { authData } = useContext(AuthContext);
-  return authData && authData.username ? children : <Navigate to="/login" />;
+  return authData && authData.userInfo ? children : <Navigate to="/login" />;
 };
 
 export default PrivateRoute;
