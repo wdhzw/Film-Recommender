@@ -34,6 +34,10 @@ type UpdateUserGenreRequest struct {
 	Genre    string `json:"genre" binding:"required"`
 }
 
+type GetUserByEmailRequest struct {
+	Email string `json:"email" binding:"required"`
+}
+
 func UserSignUp(c *gin.Context) {
 	var param UserSynUpRequest
 	if err := c.BindJSON(&param); err != nil {
@@ -153,4 +157,19 @@ func updateUserGenres(genres []string, newGenre string, maxGenres int) []string 
 	}
 
 	return genres
+}
+
+func GetUserByEmail(c *gin.Context) {
+	var param GetUserByEmailRequest
+	if err := c.BindJSON(&param); err != nil {
+		returnError(c, http.StatusBadRequest, "invalid request param", err, nil)
+		return
+	}
+	userDao := dao.GetUserTableDAO()
+	user, err := userDao.GetByEmail(c, param.Email)
+	if err != nil {
+		returnError(c, http.StatusInternalServerError, "get user failed", err, nil)
+		return
+	}
+	returnOK(c, user)
 }
