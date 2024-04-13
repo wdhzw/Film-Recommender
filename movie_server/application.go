@@ -22,5 +22,5 @@ func main() {
 	r.POST("/movie_server/update", service.UpdateMovieMeta)
 	r.POST("/movie_server/create", service.CreateMovie)
 
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run(":5000") // listen and serve on 0.0.0.0:8080
 }
