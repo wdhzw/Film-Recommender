@@ -4,6 +4,7 @@ import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import HomePage from "./pages/homePage";
 import PrivateRoute from "./pages/privateRoute";
 import DashboardPage from "./pages/dashboardPage";
+import DetailsPage from "./pages/detailsPage";
 
 function App() {
 
@@ -21,6 +22,14 @@ function App() {
                         </PrivateRoute>
                     }
                   />
+                <Route
+                    path='/movie/:movieID'
+                    element={
+                        <PrivateRoute>
+                            <DetailsPage />
+                        </PrivateRoute>
+                    }
+                />
             </Routes>
         </div>
     </Router>

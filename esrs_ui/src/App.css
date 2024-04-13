@@ -47,7 +47,6 @@ body {
   background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
 }
 
-
 .ant-modal-title {
   text-align: center;
 }
@@ -55,3 +54,46 @@ body {
 .ant-modal-body {
   padding: 24px;
 }
+
+.site-layout-content {
+  background: #fff;
+  padding: 24px;
+  margin: 0 auto;
+  min-height: 280px;
+  max-width: 1200px;
+}
+
+.logo {
+  width: 120px;
+  height: 31px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px 24px 16px 0;
+  float: left;
+}
+
+.ant-breadcrumb {
+  margin: 16px 0;
+}
+
+.ant-layout-content {
+  padding: 50px;
+}
+
+.ant-rate {
+  padding: 10px 0;
+}
+
+.ant-card-bordered {
+  border: 1px solid #ebedf0;
+}
+
+.ant-btn-primary {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .site-layout-content {
+    padding: 0;
+  }
+}
+
