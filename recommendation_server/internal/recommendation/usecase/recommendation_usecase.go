@@ -1,57 +1,64 @@
 package usecase
 
 import (
-    "recommendation_server/pkg/entity"
+    "fmt"
+    "strings"
+
     "recommendation_server/internal/recommendation/infra"
 )
 
-// RecommendationUsecase is the interface that provides recommendation methods.
-type RecommendationUsecase interface {
-    GenerateRecommendations(userID string) ([]entity.Movie, error)
+type RecommendationUsecase struct {
+    userApiClient   *infra.UserApiClient
+    movieApiClient  *infra.MovieApiClient
 }
 
-type recommendationUsecase struct {
-    userApiClient   infra.UserApiClient
-    movieApiClient  infra.MovieApiClient
-}
-
-// NewRecommendationUsecase creates a new instance of RecommendationUsecase.
-func NewRecommendationUsecase(userApi infra.UserApiClient, movieApi infra.MovieApiClient) RecommendationUsecase {
-    return &recommendationUsecase{
-        userApiClient:   userApi,
-        movieApiClient:  movieApi,
+func NewRecommendationUsecase(userApiClient *infra.UserApiClient, movieApiClient *infra.MovieApiClient) *RecommendationUsecase {
+    return &RecommendationUsecase{
+        userApiClient:   userApiClient,
+        movieApiClient:  movieApiClient,
     }
 }
 
-// GenerateRecommendations generates movie recommendations for a user.
-func (uc *recommendationUsecase) GenerateRecommendations(userID string) ([]entity.Movie, error) {
-    // Fetch user preferences from the user service.
-preferences, err := uc.userApiClient.FetchUserPreferences(userID)
-if err != nil {
-	return nil, err
-}
+func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email string) ([]infra.MovieModel, error) {
+    // Fetch user data
+    user, err := uc.userApiClient.FetchUserByEmail(email)
+    if err != nil {
+        return nil, fmt.Errorf("error fetching user data: %v", err)
+    }
 
-// Convert preferences to entity.UserPreferences
-userPreferences := infra.UserPreferences(*preferences)
+    // Fetch popular and high-rated movies
+    popularMovies, err := uc.movieApiClient.GetPopularMovies()
+    if err != nil {
+        return nil, fmt.Errorf("error fetching popular movies: %v", err)
+    }
+    highRateMovies, err := uc.movieApiClient.GetHighRateMovies()
+    if err != nil {
+        return nil, fmt.Errorf("error fetching high-rate movies: %v", err)
+    }
 
-// Fetch movie data that might be relevant for recommendation from the movie service.
-movies, err := uc.movieApiClient.FetchMovies(userPreferences)
-if err != nil {
-	return nil, err
-}
+    // Combine popular and high-rated movies
+    allMovies := append(popularMovies, highRateMovies...)
 
-// Apply the recommendation logic to the fetched movies based on the user's preferences.
-// This is where you would implement the recommendation algorithm.
-recommendedMovies := uc.applyRecommendationAlgorithm(&userPreferences, movies)
+    // Filter movies based on user's preferred genres
+    var recommendedMovies []infra.MovieModel
+    for _, movie := range allMovies {
+        movieGenres := strings.Split(movie.Genres, ",")
+        for _, genre := range user.PreferredGenre {
+            if containsGenre(movieGenres, genre) {
+                recommendedMovies = append(recommendedMovies, movie)
+                break
+            }
+        }
+    }
 
     return recommendedMovies, nil
 }
 
-// applyRecommendationAlgorithm applies the actual recommendation logic.
-func (uc *recommendationUsecase) applyRecommendationAlgorithm(preferences *infra.UserPreferences, movies []entity.Movie) []entity.Movie {
-    // recommendation algorithm.
-    // ...
-
-    // Return a subset of movies based on the algorithm.
-    return nil
+func containsGenre(genres []string, target string) bool {
+    for _, genre := range genres {
+        if strings.TrimSpace(genre) == target {
+            return true
+        }
+    }
+    return false
 }

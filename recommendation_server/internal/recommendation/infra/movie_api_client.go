@@ -5,7 +5,6 @@ import (
     "fmt"
     "net/http"
     "time"
-    "recommendation_server/pkg/entity"
 )
 
 type MovieApiClient struct {
@@ -13,35 +12,64 @@ type MovieApiClient struct {
     HTTPClient *http.Client
 }
 
+type MovieModel struct {
+    ID                 uint      `json:"id"`
+    MovieID            int64     `json:"movie_id"`
+    Title              string    `json:"title"`
+    Overview           string    `json:"overview"`
+    Rate               float64   `json:"rate"`
+    Popularity         float64   `json:"popularity"`
+    Homepage           string    `json:"homepage"`
+    PosterURI          string    `json:"poster_uri"`
+    Actors             []byte    `json:"actors"`
+    Director           string    `json:"director"`
+    Writers            string    `json:"writers"`
+    Genres             string    `json:"genres"`
+    ProductionCountry  string    `json:"production_country"`
+    Language           string    `json:"language"`
+    ReleaseDate        time.Time `json:"release_date"`
+    Duration           int       `json:"duration"`
+    Keyword            string    `json:"keyword"`
+}
+
 func NewMovieApiClient(baseURL string) *MovieApiClient {
     return &MovieApiClient{
         BaseURL: baseURL,
         HTTPClient: &http.Client{
-            Timeout: time.Second * 30, // Adjust the timeout as necessary
+            Timeout: time.Second * 30,
         },
     }
 }
 
-// FetchMovies fetches movies based on the provided preferences.
-// This is a simplified example and might need adjustments based on your actual API.
-func (c *MovieApiClient) FetchMovies(preferences UserPreferences) ([]entity.Movie, error) {
-    // Construct the URL with query parameters based on preferences.
-    // This is an example; your implementation details might vary.
-    url := fmt.Sprintf("%s/movies?genre=%s", c.BaseURL, preferences.FavoriteGenre)
-
-    resp, err := c.HTTPClient.Get(url)
+func (c *MovieApiClient) GetPopularMovies() ([]MovieModel, error) {
+    // Send the request
+    resp, err := c.HTTPClient.Get(c.BaseURL + "/movie_server/popular")
     if err != nil {
-        return nil, fmt.Errorf("error fetching movies: %v", err)
+        return nil, fmt.Errorf("error fetching popular movies: %v", err)
     }
     defer resp.Body.Close()
 
-    if resp.StatusCode != http.StatusOK {
-        return nil, fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
+    // Parse the response
+    var movies []MovieModel
+    if err := json.NewDecoder(resp.Body).Decode(&movies); err != nil {
+        return nil, fmt.Errorf("error decoding popular movies: %v", err)
     }
 
-    var movies []entity.Movie
+    return movies, nil
+}
+
+func (c *MovieApiClient) GetHighRateMovies() ([]MovieModel, error) {
+    // Send the request
+    resp, err := c.HTTPClient.Get(c.BaseURL + "/movie_server/top_rate")
+    if err != nil {
+        return nil, fmt.Errorf("error fetching high-rate movies: %v", err)
+    }
+    defer resp.Body.Close()
+
+    // Parse the response
+    var movies []MovieModel
     if err := json.NewDecoder(resp.Body).Decode(&movies); err != nil {
-        return nil, fmt.Errorf("error decoding movies: %v", err)
+        return nil, fmt.Errorf("error decoding high-rate movies: %v", err)
     }
 
     return movies, nil

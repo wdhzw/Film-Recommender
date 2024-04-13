@@ -3,23 +3,29 @@ package http
 import (
     "encoding/json"
     "net/http"
+
     "recommendation_server/internal/recommendation/usecase"
 )
 
-func RecommendationHandler(uc usecase.RecommendationUsecase) http.HandlerFunc {
+func RecommendationHandler(uc *usecase.RecommendationUsecase) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-        // Parse user ID from query parameters or body
-        userID := r.URL.Query().Get("user_id")
+        // Extract user email from request body
+        var req struct {
+            Email string `json:"email"`
+        }
+        if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+            http.Error(w, "invalid request body", http.StatusBadRequest)
+            return
+        }
 
-        // Call the usecase to get recommendations
-        recommendations, err := uc.GenerateRecommendations(userID)
-        if err != nil {	
-            // Handle error
+        // Generate personalized recommendations
+        recommendedMovies, err := uc.GeneratePersonalizedRecommendations(req.Email)
+        if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
 
-        // Send the recommendations back as JSON
-        json.NewEncoder(w).Encode(recommendations)
+        // Return the recommended movies as JSON response
+        json.NewEncoder(w).Encode(recommendedMovies)
     }
 }

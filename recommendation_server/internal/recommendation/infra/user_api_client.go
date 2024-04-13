@@ -1,6 +1,7 @@
 package infra
 
 import (
+    "bytes"
     "encoding/json"
     "fmt"
     "net/http"
@@ -12,41 +13,41 @@ type UserApiClient struct {
     HTTPClient *http.Client
 }
 
-type UserPreferences struct {
-    // Fields that match the JSON structure of the response from the user service
-		FavoriteGenre string `json:"favorite_genre"`
+type UserTable struct {
+    UserID          string   `json:"user_id"`
+    UserName        string   `json:"user_name"`
+    Email           string   `json:"email"`
+    CreateTime      int64    `json:"create_time"`
+    UpdateTime      int64    `json:"update_time"`
+    PreferredGenre  []string `json:"preferred_genre,omitempty"`
 }
 
 func NewUserApiClient(baseURL string) *UserApiClient {
     return &UserApiClient{
         BaseURL: baseURL,
         HTTPClient: &http.Client{
-            Timeout: time.Second * 30, // or another appropriate timeout
+            Timeout: time.Second * 30,
         },
     }
 }
 
-func (c *UserApiClient) FetchUserPreferences(userID string) (*UserPreferences, error) {
-    // Construct the request URL
-    url := fmt.Sprintf("%s/user/%s/preferences", c.BaseURL, userID)
+func (c *UserApiClient) FetchUserByEmail(email string) (*UserTable, error) {
+    // Prepare the request body
+    body := map[string]string{"email": email}
+    jsonBody, _ := json.Marshal(body)
 
-    // Execute the request
-    resp, err := c.HTTPClient.Get(url)
+    // Send the request
+    resp, err := c.HTTPClient.Post(c.BaseURL+"/get_user_by_email", "application/json", bytes.NewBuffer(jsonBody))
     if err != nil {
-        return nil, fmt.Errorf("error fetching user preferences: %v", err)
+        return nil, fmt.Errorf("error fetching user by email: %v", err)
     }
     defer resp.Body.Close()
 
-    // Check the response status code
-    if resp.StatusCode != http.StatusOK {
-        return nil, fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
+    // Parse the response
+    var user UserTable
+    if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+        return nil, fmt.Errorf("error decoding user data: %v", err)
     }
 
-    // Decode the response body into the UserPreferences struct
-    var preferences UserPreferences
-    if err := json.NewDecoder(resp.Body).Decode(&preferences); err != nil {
-        return nil, fmt.Errorf("error decoding user preferences: %v", err)
-    }
-
-    return &preferences, nil
+    return &user, nil
 }
