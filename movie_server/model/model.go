@@ -2,6 +2,7 @@ package model
 
 import (
 	"CS5224_ESRS/movie/infra"
+	"fmt"
 	"time"
 )
 
@@ -84,10 +85,6 @@ func (p *MovieProxy) GetHighRateMovies(page int) ([]*MovieModel, error) {
 	return movies, nil
 }
 
-func (p *MovieProxy) SearchMovies(page int) ([]*MovieModel, error) {
-	return nil, nil
-}
-
 func (p *MovieProxy) UpdateMovies(movieId int64, popularity, rate float64) error {
 	err := infra.Mysql.Model(&MovieModel{}).
 		Where("movie_id = ? ", movieId).
@@ -101,4 +98,17 @@ func (p *MovieProxy) UpdateMovies(movieId int64, popularity, rate float64) error
 
 func (p *MovieProxy) CreateMovie(model *MovieModel) error {
 	return infra.Mysql.Model(&MovieModel{}).Create(model).Error
+}
+
+func (p *MovieProxy) SearchMovie(word string) ([]*MovieModel, error) {
+	movies := make([]*MovieModel, 0)
+	err := infra.Mysql.Model(&MovieModel{}).
+		Where("title LIKE ?", fmt.Sprint("%s%", word)).
+		Limit(50).
+		Find(&movies).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return movies, nil
 }
