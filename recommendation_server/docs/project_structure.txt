@@ -1,0 +1,308 @@
+--- Folder Structure ---
+[cmd]
+    └── [server]
+        └── main.go
+[config]
+    └── config.go
+[docs]
+    └── .project_structure_ignore
+go.mod
+[internal]
+    └── [recommendation]
+        ├── [delivery]
+            └── [http]
+                └── handler.go
+        ├── [infra]
+            ├── movie_api_client.go
+            └── user_api_client.go
+        ├── [repository]
+        └── [usecase]
+            └── recommendation_usecase.go
+[migrations]
+[pkg]
+    └── [entity]
+        └── recommendation.go
+[scripts]
+
+--- File Contents ---
+
+--- File: cmd/server/main.go ---
+// main.go
+package main
+
+import (
+    "log"
+    "net/http"
+    "recommendation_server/config"
+    "recommendation_server/internal/recommendation/infra"
+    "recommendation_server/internal/recommendation/usecase"
+)
+
+func main() {
+    cfg := config.GetConfig()
+
+    movieApiClient := infra.NewMovieApiClient(cfg.MovieAPIURL)
+    userApiClient := infra.NewUserApiClient(cfg.UserAPIURL)
+    recommendationUsecase := usecase.NewRecommendationUsecase(userApiClient, movieApiClient)
+
+    http.HandleFunc("/recommendations", func(w http.ResponseWriter, r *http.Request) {
+        userID := r.URL.Query().Get("user_id")
+        if userID == "" {
+            http.Error(w, "User ID is required", http.StatusBadRequest)
+            return
+        }
+
+        movies, err := recommendationUsecase.GenerateRecommendations(userID)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+
+        respondWithJSON(w, movies)
+    })
+
+    log.Println("Server is running at http://localhost:8080")
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func respondWithJSON(w http.ResponseWriter, data interface{}) {
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(data)
+}
+
+
+--- File: config/config.go ---
+// config/config.go
+package config
+
+import (
+    //"log"
+    "os"
+)
+
+type Config struct {
+    MovieAPIURL string
+    UserAPIURL  string
+}
+
+func GetConfig() Config {
+    return Config{
+        MovieAPIURL: getEnv("MOVIE_API_URL", "http://localhost:5001"),
+        UserAPIURL:  getEnv("USER_API_URL", "http://localhost:5002"), // Default ports, adjust as necessary
+    }
+}
+
+func getEnv(key, fallback string) string {
+    if value, ok := os.LookupEnv(key); ok {
+        return value
+    }
+    return fallback
+}
+
+
+--- File: docs/.project_structure_ignore ---
+
+
+--- File: go.mod ---
+module recommendation_server
+
+go 1.22.0
+
+
+--- File: internal/recommendation/delivery/http/handler.go ---
+package http
+
+import (
+    "encoding/json"
+    "net/http"
+    "recommendation_server/internal/recommendation/usecase"
+)
+
+func RecommendationHandler(uc usecase.RecommendationUsecase) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        // Parse user ID from query parameters or body
+        userID := r.URL.Query().Get("user_id")
+
+        // Call the usecase to get recommendations
+        recommendations, err := uc.GenerateRecommendations(userID)
+        if err != nil {	
+            // Handle error
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+
+        // Send the recommendations back as JSON
+        json.NewEncoder(w).Encode(recommendations)
+    }
+}
+
+
+--- File: internal/recommendation/infra/movie_api_client.go ---
+package infra
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+	"recommendation_server/pkg/entity"
+)
+
+type MovieApiClient struct {
+	BaseURL    string
+	HTTPClient *http.Client
+}
+
+func NewMovieApiClient(baseURL string) *MovieApiClient {
+	return &MovieApiClient{
+		BaseURL: baseURL,
+		HTTPClient: &http.Client{
+			Timeout: time.Second * 30, // Adjust as necessary
+		},
+	}
+}
+
+func (c *MovieApiClient) GetPopularMovies() ([]entity.Movie, error) {
+	return c.fetchMovies("/movie_server/popular")
+}
+
+func (c *MovieApiClient) GetHighRateMovies() ([]entity.Movie, error) {
+	return c.fetchMovies("/movie_server/top_rate")
+}
+
+func (c *MovieApiClient) fetchMovies(apiPath string) ([]entity.Movie, error) {
+	url := fmt.Sprintf("%s%s", c.BaseURL, apiPath)
+
+	resp, err := c.HTTPClient.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching movies: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
+	}
+
+	var movies []entity.Movie
+	if err := json.NewDecoder(resp.Body).Decode(&movies); err != nil {
+		return nil, fmt.Errorf("error decoding movie list: %v", err)
+	}
+
+	return movies, nil
+}
+
+
+--- File: internal/recommendation/infra/user_api_client.go ---
+package infra
+
+import (
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "time"
+)
+
+type UserApiClient struct {
+    BaseURL    string
+    HTTPClient *http.Client
+}
+
+type UserPreferences struct {
+    // Fields that match the JSON structure of the response from the user service
+		FavoriteGenre string `json:"favorite_genre"`
+}
+
+func NewUserApiClient(baseURL string) *UserApiClient {
+    return &UserApiClient{
+        BaseURL: baseURL,
+        HTTPClient: &http.Client{
+            Timeout: time.Second * 30, // or another appropriate timeout
+        },
+    }
+}
+
+func (c *UserApiClient) FetchUserPreferences(userID string) (*UserPreferences, error) {
+    // Construct the request URL
+    url := fmt.Sprintf("%s/user/%s/preferences", c.BaseURL, userID)
+
+    // Execute the request
+    resp, err := c.HTTPClient.Get(url)
+    if err != nil {
+        return nil, fmt.Errorf("error fetching user preferences: %v", err)
+    }
+    defer resp.Body.Close()
+
+    // Check the response status code
+    if resp.StatusCode != http.StatusOK {
+        return nil, fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
+    }
+
+    // Decode the response body into the UserPreferences struct
+    var preferences UserPreferences
+    if err := json.NewDecoder(resp.Body).Decode(&preferences); err != nil {
+        return nil, fmt.Errorf("error decoding user preferences: %v", err)
+    }
+
+    return &preferences, nil
+}
+
+
+--- File: internal/recommendation/usecase/recommendation_usecase.go ---
+package usecase
+
+import (
+	"recommendation_server/internal/recommendation/infra"
+	"recommendation_server/pkg/entity"
+)
+
+// RecommendationUsecase is the interface that provides recommendation methods.
+type RecommendationUsecase interface {
+	GenerateRecommendations(userID string) ([]entity.Movie, error)
+}
+
+type recommendationUsecase struct {
+	movieApiClient infra.MovieApiClient
+}
+
+// NewRecommendationUsecase creates a new instance of RecommendationUsecase.
+func NewRecommendationUsecase(movieApi infra.MovieApiClient) RecommendationUsecase {
+	return &recommendationUsecase{
+		movieApiClient: movieApi,
+	}
+}
+
+// GenerateRecommendations generates movie recommendations for a user.
+// It simply returns a combination of popular and high-rated movies.
+func (uc *recommendationUsecase) GenerateRecommendations(userID string) ([]entity.Movie, error) {
+	popularMovies, err := uc.movieApiClient.GetPopularMovies()
+	if err != nil {
+		return nil, err
+	}
+
+	highRateMovies, err := uc.movieApiClient.GetHighRateMovies()
+	if err != nil {
+		return nil, err
+	}
+
+	// Combine popular and high-rate movies into a single slice.
+	// This simplistic merging does not eliminate possible duplicates.
+	allMovies := append(popularMovies, highRateMovies...)
+
+	return allMovies, nil
+}
+
+
+--- File: pkg/entity/recommendation.go ---
+package entity
+
+type Recommendation struct {
+    UserID string
+    Movies []Movie
+}
+
+type Movie struct {
+    ID       string
+    Title    string
+    // other movie properties
+}
+
