@@ -51,7 +51,6 @@ func GetUserTableDAO() UserTableDao {
 
 // Returns UserID
 func (dao *userTableDynamoDAO) Create(ctx context.Context, userName string, email string) (string, error) {
-	dbClient := client.GetDynamoDBClient()
 	now := time.Now()
 	nowUnix := now.Unix()
 	item := entity.UserTable{
@@ -68,7 +67,7 @@ func (dao *userTableDynamoDAO) Create(ctx context.Context, userName string, emai
 		return "", err
 	}
 
-	_, putItemErr := dbClient.PutItem(&dynamodb.PutItemInput{
+	_, putItemErr := dao.dbClient.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String(UserTable),
 		Item:      marshaledItem,
 	})
@@ -80,9 +79,7 @@ func (dao *userTableDynamoDAO) Create(ctx context.Context, userName string, emai
 }
 
 func (dao *userTableDynamoDAO) GetByUID(ctx context.Context, userID string) (*entity.UserTable, error) {
-	dbClient := client.GetDynamoDBClient()
 	filter := expression.Name("user_id").Equal(expression.Value(userID))
-
 	expr, err := expression.NewBuilder().WithFilter(filter).Build()
 	if err != nil {
 		log.Printf("[userTableDynamoDAO-GetByUID] Got error building expression: %s", err)
@@ -97,7 +94,7 @@ func (dao *userTableDynamoDAO) GetByUID(ctx context.Context, userID string) (*en
 		TableName:                 aws.String(UserTable),
 	}
 
-	result, err := dbClient.Scan(params)
+	result, err := dao.dbClient.Scan(params)
 	if err != nil {
 		log.Printf("[userTableDynamoDAO-GetByUID] Query API call failed: %s", err)
 		return nil, err
@@ -118,7 +115,6 @@ func (dao *userTableDynamoDAO) GetByUID(ctx context.Context, userID string) (*en
 }
 
 func (dao *userTableDynamoDAO) GetByEmail(ctx context.Context, email string) (*entity.UserTable, error) {
-	dbClient := client.GetDynamoDBClient()
 	filter := expression.Name("email").Equal(expression.Value(email))
 
 	expr, err := expression.NewBuilder().WithFilter(filter).Build()
@@ -135,7 +131,7 @@ func (dao *userTableDynamoDAO) GetByEmail(ctx context.Context, email string) (*e
 		TableName:                 aws.String(UserTable),
 	}
 
-	result, err := dbClient.Scan(params)
+	result, err := dao.dbClient.Scan(params)
 	if err != nil {
 		log.Printf("[userTableDynamoDAO-GetByEmail] Query API call failed: %s", err)
 		return nil, err
@@ -156,7 +152,6 @@ func (dao *userTableDynamoDAO) GetByEmail(ctx context.Context, email string) (*e
 }
 
 func (dao *userTableDynamoDAO) Update(ctx context.Context, params UpdateUserParams) error {
-	dbClient := client.GetDynamoDBClient()
 	marshaledGenreList, err := dynamodbattribute.MarshalList(params.PreferredGenre)
 	if err != nil {
 		log.Printf("[userTableDynamoDAO-Update] Got error marshalling preferred genres: %s", err)
@@ -184,7 +179,7 @@ func (dao *userTableDynamoDAO) Update(ctx context.Context, params UpdateUserPara
 		ReturnValues: aws.String("UPDATED_NEW"),
 	}
 
-	_, err = dbClient.UpdateItem(input)
+	_, err = dao.dbClient.UpdateItem(input)
 	if err != nil {
 		log.Printf("[userTableDynamoDAO-Update] Got error updating item: %s", err)
 		return err

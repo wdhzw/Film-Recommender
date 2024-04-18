@@ -26,6 +26,7 @@ func main() {
 
 	r.Use(
 		middleware.PanicMiddleware,
+		middleware.CORSMiddleware(),
 	)
 
 	public := r.Group("/api")

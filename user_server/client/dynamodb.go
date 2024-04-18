@@ -5,7 +5,6 @@ import (
 
 	"ESRS/user_server/config"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
@@ -21,8 +20,7 @@ func InitDynamoDB() {
 	}
 	dynamoConfig := cfg.Dynamo
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(dynamoConfig.Region),
-		Credentials: credentials.NewStaticCredentials(dynamoConfig.AccessID, dynamoConfig.AccessSecret, ""),
+		Region: aws.String(dynamoConfig.Region),
 	})
 	if err != nil {
 		panic(fmt.Sprintf("Error creating session: %s", err))
