@@ -7,12 +7,7 @@ import (
 const (
 	InternalError int = 10001
 
-	UserNotRegister        int = 1000
-	InvitationCodeNotValid int = 1001
-
-	RetweetVerifyRateLimit int = 2000
-	XAccountAlreadyInUse   int = 2001
-	XAccountFailAuth       int = 2002
+	UserPasswordIncorrect int = 1000
 )
 
 func returnError(c *gin.Context, status int, message string, err error, businessErrorCode *int) {
