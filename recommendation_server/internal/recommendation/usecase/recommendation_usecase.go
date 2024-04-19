@@ -93,7 +93,7 @@ func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email strin
 		}
 	}
 
-	rawItems := make([]Item, 0, len(movies))
+	rawItems := make([]*Item, 0, len(movies))
 	for _, m := range movies {
 		rawItems = append(rawItems, m)
 	}
