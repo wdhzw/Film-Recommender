@@ -1,0 +1,9 @@
+Dynamo:
+  Region: "us-east-1"
+  AccessID: "AKIA6GBMETJ3276XNP3K"
+  AccessSecret: "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"
+  ConnectionTimeout: "2000"
+
+Cognito:
+  Region: "us-east-1"
+  AppClientID: "9jl59g8r6r3672hqpgip0fvgd"
