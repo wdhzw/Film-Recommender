@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"recommendation_server/internal/recommendation/infra"
+	"CS5224_ESRS/recommendation_server/internal/recommendation/infra"
 )
 
 type RecommendationUsecase struct {

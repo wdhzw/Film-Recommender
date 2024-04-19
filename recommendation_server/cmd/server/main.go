@@ -1,33 +1,33 @@
 package main
 
 import (
-    "recommendation_server/config"
-    "recommendation_server/internal/recommendation/delivery/http"
-    "recommendation_server/internal/recommendation/infra"
-    "recommendation_server/internal/recommendation/usecase"
-    "github.com/gin-gonic/gin"
+	"CS5224_ESRS/recommendation_server/config"
+	"CS5224_ESRS/recommendation_server/internal/recommendation/delivery/http"
+	"CS5224_ESRS/recommendation_server/internal/recommendation/infra"
+	"CS5224_ESRS/recommendation_server/internal/recommendation/usecase"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    // Load configuration
-    cfg := config.GetConfig()
+	// Load configuration
+	cfg := config.GetConfig()
 
-    // Initialize infrastructure
-    userApiClient := infra.NewUserApiClient(cfg.UserAPIURL)
-    movieApiClient := infra.NewMovieApiClient(cfg.MovieAPIURL)
+	// Initialize infrastructure
+	userApiClient := infra.NewUserApiClient(cfg.UserAPIURL)
+	movieApiClient := infra.NewMovieApiClient(cfg.MovieAPIURL)
 
-    // Initialize usecase
-    recommendationUsecase := usecase.NewRecommendationUsecase(userApiClient, movieApiClient)
+	// Initialize usecase
+	recommendationUsecase := usecase.NewRecommendationUsecase(userApiClient, movieApiClient)
 
-    // Create Gin router
-    r := gin.Default()
+	// Create Gin router
+	r := gin.Default()
 
-    // Apply CORS middleware
-    r.Use(gin.Recovery(), http.CORSMiddleware())
+	// Apply CORS middleware
+	r.Use(gin.Recovery(), http.CORSMiddleware())
 
-    // Define routes
-    r.GET("/recommendations", http.RecommendationHandler(recommendationUsecase))
+	// Define routes
+	r.GET("/recommendations", http.RecommendationHandler(recommendationUsecase))
 
-    // Start the server
-    r.Run(":8080")
+	// Start the server
+	r.Run(":8080")
 }
