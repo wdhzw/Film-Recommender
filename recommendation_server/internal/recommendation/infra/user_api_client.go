@@ -21,6 +21,12 @@ type UserTable struct {
     UpdateTime      int64    `json:"update_time"`
     PreferredGenre  []string `json:"preferred_genre,omitempty"`
 }
+type UserApiResponse struct {
+    Data       UserTable  `json:"data"`
+    Error      *string    `json:"error"`       // Using a pointer to handle null
+    StatusCode int        `json:"status_code"`
+}
+
 
 func NewUserApiClient(baseURL string) *UserApiClient {
     return &UserApiClient{
@@ -44,10 +50,20 @@ func (c *UserApiClient) FetchUserByEmail(email string) (*UserTable, error) {
     defer resp.Body.Close()
 
     // Parse the response
-    var user UserTable
-    if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+    var response UserApiResponse
+    if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
         return nil, fmt.Errorf("error decoding user data: %v", err)
     }
 
-    return &user, nil
+    // Handle potential API-reported errors
+    if response.Error != nil {
+        return nil, fmt.Errorf("API error: %s", *response.Error)
+    }
+
+    // Check the status code for non-success cases
+    if response.StatusCode != 0 { // Assuming 0 means success
+        return nil, fmt.Errorf("API returned non-success status code: %d", response.StatusCode)
+    }
+    //fmt.Printf("Fetched User: %+v\n", response.Data)
+    return &response.Data, nil
 }

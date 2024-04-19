@@ -13,6 +13,8 @@ func GetConfig() Config {
     return Config{
         MovieAPIURL: getEnv("MOVIE_API_URL", "http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server"),
         UserAPIURL:  getEnv("USER_API_URL", "http://ec2-44-217-97-83.compute-1.amazonaws.com:8080/api"),
+        // MovieAPIURL: getEnv("MOVIE_API_URL", "http://localhost:5001"),
+        // UserAPIURL:  getEnv("USER_API_URL", "http://localhost:8088/api"),
     }
 }
 

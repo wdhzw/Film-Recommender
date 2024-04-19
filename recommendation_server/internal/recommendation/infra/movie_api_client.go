@@ -7,31 +7,55 @@ import (
     "time"
 )
 
+// MovieApiClient represents a client for making API calls to fetch movie data.
 type MovieApiClient struct {
     BaseURL    string
     HTTPClient *http.Client
 }
 
-type MovieModel struct {
-    ID                 uint      `json:"id"`
-    MovieID            int64     `json:"movie_id"`
-    Title              string    `json:"title"`
-    Overview           string    `json:"overview"`
-    Rate               float64   `json:"rate"`
-    Popularity         float64   `json:"popularity"`
-    Homepage           string    `json:"homepage"`
-    PosterURI          string    `json:"poster_uri"`
-    Actors             []byte    `json:"actors"`
-    Director           string    `json:"director"`
-    Writers            string    `json:"writers"`
-    Genres             string    `json:"genres"`
-    ProductionCountry  string    `json:"production_country"`
-    Language           string    `json:"language"`
-    ReleaseDate        time.Time `json:"release_date"`
-    Duration           int       `json:"duration"`
-    Keyword            string    `json:"keyword"`
+// Pagination defines the structure for API response pagination details.
+type Pagination struct {
+    CurrentPage int `json:"current_page"`
+    TotalNumber int `json:"total_number"`
+    TotalPages  int `json:"total_pages"`
 }
 
+// PopularMovieModel defines the structure for movies fetched from the popular movies endpoint.
+type PopularMovieModel struct {
+    MovieID      int64     `json:"movie_id"`
+    Title        string    `json:"title"`
+    Overview     string    `json:"overview"`
+    Popularity   float64   `json:"popularity"`
+    Genres       []string  `json:"genres"`
+    ReleaseDate  time.Time `json:"release_date"`
+    Duration     int       `json:"duration"`
+    Keywords     []string  `json:"keywords"`
+}
+
+// HighRateMovieModel defines the structure for movies fetched from the high-rate movies endpoint.
+type HighRateMovieModel struct {
+    MovieID      int64     `json:"movie_id"`
+    Title        string    `json:"title"`
+    Rate         float64   `json:"rate"`
+    Genres       []string  `json:"genres"`
+    ReleaseDate  time.Time `json:"release_date"`
+    Duration     int       `json:"duration"`
+    Keywords     []string  `json:"keywords"`
+}
+
+// PopularMovieResponse wraps the response from the popular movies endpoint.
+type PopularMovieResponse struct {
+    Content    []PopularMovieModel `json:"content"`
+    Pagination Pagination          `json:"pagination"`
+}
+
+// HighRateMovieResponse wraps the response from the high-rate movies endpoint.
+type HighRateMovieResponse struct {
+    Content    []HighRateMovieModel `json:"content"`
+    Pagination Pagination           `json:"pagination"`
+}
+
+// NewMovieApiClient creates a new instance of MovieApiClient.
 func NewMovieApiClient(baseURL string) *MovieApiClient {
     return &MovieApiClient{
         BaseURL: baseURL,
@@ -41,37 +65,34 @@ func NewMovieApiClient(baseURL string) *MovieApiClient {
     }
 }
 
-func (c *MovieApiClient) GetPopularMovies() ([]MovieModel, error) {
-    // Send the request
+// GetPopularMovies fetches the popular movies from the API.
+func (c *MovieApiClient) GetPopularMovies() (PopularMovieResponse, error) {
     resp, err := c.HTTPClient.Get(c.BaseURL + "/popular")
     if err != nil {
-        return nil, fmt.Errorf("error fetching popular movies: %v", err)
+        return PopularMovieResponse{}, fmt.Errorf("error fetching popular movies: %v", err)
     }
     defer resp.Body.Close()
 
-    // Parse the response
-    var movies []MovieModel
-    if err := json.NewDecoder(resp.Body).Decode(&movies); err != nil {
-        
-        return nil, fmt.Errorf("error decoding popular movies: %v", err)
+    var response PopularMovieResponse
+    if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+        return PopularMovieResponse{}, fmt.Errorf("error decoding popular movies: %v", err)
     }
 
-    return movies, nil
+    return response, nil
 }
 
-func (c *MovieApiClient) GetHighRateMovies() ([]MovieModel, error) {
-    // Send the request
+// GetHighRateMovies fetches the high-rated movies from the API.
+func (c *MovieApiClient) GetHighRateMovies() (HighRateMovieResponse, error) {
     resp, err := c.HTTPClient.Get(c.BaseURL + "/top_rate")
     if err != nil {
-        return nil, fmt.Errorf("error fetching high-rate movies: %v", err)
+        return HighRateMovieResponse{}, fmt.Errorf("error fetching high-rate movies: %v", err)
     }
     defer resp.Body.Close()
 
-    // Parse the response
-    var movies []MovieModel
-    if err := json.NewDecoder(resp.Body).Decode(&movies); err != nil {
-        return nil, fmt.Errorf("error decoding high-rate movies: %v", err)
+    var response HighRateMovieResponse
+    if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+        return HighRateMovieResponse{}, fmt.Errorf("error decoding high-rate movies: %v", err)
     }
 
-    return movies, nil
+    return response, nil
 }
