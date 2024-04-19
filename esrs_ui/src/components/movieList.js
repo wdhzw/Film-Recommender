@@ -4,24 +4,24 @@ import './movieList.css';
 
 const data = [
   {
-    title: 'Movie 1',
-    url: '/logo192.png'
+    title: 'To Mom (and Dad) with love',
+    url: 'https://image.tmdb.org/t/p/original/sChfCU3PDV3N6nYessVPWeWkUBc.jpg'
   },
   {
-    title: 'Movie 2',
-    url: '/logo192.png'
+    title: 'The book of love',
+    url: 'https://image.tmdb.org/t/p/original/hwP0GEP0zy8ar965Xaht19SmMd3.jpg'
   },
   {
-    title: 'Movie 3',
-    url: '/logo192.png'
+    title: 'Endless Love',
+    url: 'https://image.tmdb.org/t/p/original/z7FZP6uivgVc4t0mnmia0B8YygW.jpg'
   },
     {
-    title: 'Movie 4',
-    url: '/logo192.png'
+    title: 'Love Strange Love',
+    url: 'https://image.tmdb.org/t/p/original/9CNnxpI6H8ynyOlACRc25vqgJBY.jpg'
   },
     {
-    title: 'Movie 5',
-    url: '/logo192.png'
+    title: 'Sorry If I Call You Love',
+    url: 'https://image.tmdb.org/t/p/original/pnSXPKQPjVi87YEeRYlbg5aUaGs.jpg'
   },
 ];
 
@@ -34,7 +34,15 @@ const MoiveList = () => {
         <List.Item>
           <Card
             hoverable
-            cover={<img alt={item.title} src={item.url} />}
+            cover={
+            <img
+                style={{
+                    height: '300px',
+                    width: '250px'
+                }}
+                alt={item.title}
+                src={item.url}
+            />}
           >
             {item.title}
           </Card>

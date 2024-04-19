@@ -1,5 +1,6 @@
 const userURL = `http://ec2-44-217-97-83.compute-1.amazonaws.com:8080/api/`
 const movieURL = `http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/`
+const searchURL = `http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/search`
 
 const login = async (username, email, pwd) => {
     const headers = new Headers();
@@ -150,8 +151,8 @@ const confirmSignUp = async (username, email, code) => {
     }
 }
 
-const movieDetail = async(movieID) => {
-     const headers = new Headers();
+const getMovieDetail = async(movieID) => {
+    const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("Accept", "*/*")
     headers.append("Accept-Encoding", "gzip, deflate, br")
@@ -173,11 +174,35 @@ const movieDetail = async(movieID) => {
     }
 }
 
+const searchMovie = async(keywords) => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Accept", "*/*")
+    headers.append("Accept-Encoding", "gzip, deflate, br")
+
+    try {
+        const response = await fetch(searchURL + "?search_word=" + keywords, {
+            method: 'GET',
+            headers: headers,
+        })
+        if (response.ok) {
+            return await response.json()
+        } else {
+            console.error('Get search list failed', await response.text())
+            return null
+        }
+    } catch (error) {
+        console.error('Error:', error)
+        return null
+    }
+}
+
 export {
     login,
     getUserInfo,
     addGenre,
     signUp,
     confirmSignUp,
-    movieDetail,
+    getMovieDetail,
+    searchMovie,
 }
