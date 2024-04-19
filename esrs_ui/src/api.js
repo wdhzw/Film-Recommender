@@ -1,4 +1,5 @@
-const baseURL = `http://ec2-34-206-66-131.compute-1.amazonaws.com:8080/api/`
+const userURL = `http://ec2-44-217-97-83.compute-1.amazonaws.com:8080/api/`
+const movieURL = `http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/`
 
 const login = async (username, email, pwd) => {
     const headers = new Headers();
@@ -13,7 +14,7 @@ const login = async (username, email, pwd) => {
     });
 
     try {
-        const response = await fetch(baseURL + 'user_login', {
+        const response = await fetch(userURL + 'user_login', {
             method: 'POST',
             headers: headers,
             body: raw,
@@ -41,7 +42,7 @@ const getUserInfo= async (email) => {
     });
 
     try {
-        const response = await fetch(baseURL + 'get_user_by_email', {
+        const response = await fetch(userURL + 'get_user_by_email', {
             method: 'POST',
             headers: headers,
             body: raw,
@@ -72,7 +73,7 @@ const addGenre = async(username, email, newGenre) => {
 
 
     try {
-        const response = await fetch(baseURL + 'update_user_genre', {
+        const response = await fetch(userURL + 'update_user_genre', {
             method: 'POST',
             headers: headers,
             body: raw,
@@ -102,7 +103,7 @@ const signUp = async (username, email, pwd) => {
     });
 
     try {
-        const response = await fetch(baseURL + 'user_sign_up', {
+        const response = await fetch(userURL + 'user_sign_up', {
             method: 'POST',
             headers: headers,
             body: raw,
@@ -132,7 +133,7 @@ const confirmSignUp = async (username, email, code) => {
     });
 
     try {
-        const response = await fetch(baseURL + 'confirm_user_sign_up', {
+        const response = await fetch(userURL + 'confirm_user_sign_up', {
             method: 'POST',
             headers: headers,
             body: raw,
@@ -149,10 +150,34 @@ const confirmSignUp = async (username, email, code) => {
     }
 }
 
+const movieDetail = async(movieID) => {
+     const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Accept", "*/*")
+    headers.append("Accept-Encoding", "gzip, deflate, br")
+
+    try {
+        const response = await fetch(movieURL + movieID, {
+            method: 'GET',
+            headers: headers,
+        })
+        if (response.ok) {
+            return await response.json()
+        } else {
+            console.error('Get movie detail failed', await response.text())
+            return null
+        }
+    } catch (error) {
+        console.error('Error:', error)
+        return null
+    }
+}
+
 export {
     login,
     getUserInfo,
     addGenre,
     signUp,
-    confirmSignUp
+    confirmSignUp,
+    movieDetail,
 }
