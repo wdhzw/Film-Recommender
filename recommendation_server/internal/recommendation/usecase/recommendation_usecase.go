@@ -24,7 +24,7 @@ type Item struct {
 	Score float64
 }
 
-func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email string) ([]interface{}, error) {
+func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email string, pageNumber int) ([]interface{}, error) {
 	user, err := uc.userApiClient.FetchUserByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching user data: %v", err)
@@ -34,15 +34,14 @@ func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email strin
         return nil, fmt.Errorf("no user found with the email %s or no preferred genres set", email)
     }
 
-	popularResponse, err := uc.movieApiClient.GetPopularMovies()
-	if err != nil {
-		return nil, fmt.Errorf("error fetching popular movies: %v", err)
-	}
-
-	highRateResponse, err := uc.movieApiClient.GetHighRateMovies()
-	if err != nil {
-		return nil, fmt.Errorf("error fetching high-rate movies: %v", err)
-	}
+    popularResponse, err := uc.movieApiClient.GetPopularMovies(pageNumber)
+    if err != nil {
+        return nil, fmt.Errorf("error fetching popular movies: %v", err)
+    }
+    highRateResponse, err := uc.movieApiClient.GetHighRateMovies(pageNumber)
+    if err != nil {
+        return nil, fmt.Errorf("error fetching high-rate movies: %v", err)
+    }
 
 	preferenceSet := make(map[string]struct{})
 	for _, genre := range user.PreferredGenre {

@@ -65,9 +65,9 @@ func NewMovieApiClient(baseURL string) *MovieApiClient {
     }
 }
 
-// GetPopularMovies fetches the popular movies from the API.
-func (c *MovieApiClient) GetPopularMovies() (PopularMovieResponse, error) {
-    resp, err := c.HTTPClient.Get(c.BaseURL + "/popular")
+func (c *MovieApiClient) GetPopularMovies(pageNumber int) (PopularMovieResponse, error) {
+    url := fmt.Sprintf("%s/popular?page=%d", c.BaseURL, pageNumber)
+    resp, err := c.HTTPClient.Get(url)
     if err != nil {
         return PopularMovieResponse{}, fmt.Errorf("error fetching popular movies: %v", err)
     }
@@ -81,9 +81,9 @@ func (c *MovieApiClient) GetPopularMovies() (PopularMovieResponse, error) {
     return response, nil
 }
 
-// GetHighRateMovies fetches the high-rated movies from the API.
-func (c *MovieApiClient) GetHighRateMovies() (HighRateMovieResponse, error) {
-    resp, err := c.HTTPClient.Get(c.BaseURL + "/top_rate")
+func (c *MovieApiClient) GetHighRateMovies(pageNumber int) (HighRateMovieResponse, error) {
+    url := fmt.Sprintf("%s/top_rate?page=%d", c.BaseURL, pageNumber)
+    resp, err := c.HTTPClient.Get(url)
     if err != nil {
         return HighRateMovieResponse{}, fmt.Errorf("error fetching high-rate movies: %v", err)
     }
