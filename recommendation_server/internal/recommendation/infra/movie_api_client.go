@@ -43,7 +43,7 @@ func NewMovieApiClient(baseURL string) *MovieApiClient {
 
 func (c *MovieApiClient) GetPopularMovies() ([]MovieModel, error) {
     // Send the request
-    resp, err := c.HTTPClient.Get(c.BaseURL + "/movie_server/popular")
+    resp, err := c.HTTPClient.Get(c.BaseURL + "/popular")
     if err != nil {
         return nil, fmt.Errorf("error fetching popular movies: %v", err)
     }
@@ -52,6 +52,7 @@ func (c *MovieApiClient) GetPopularMovies() ([]MovieModel, error) {
     // Parse the response
     var movies []MovieModel
     if err := json.NewDecoder(resp.Body).Decode(&movies); err != nil {
+        
         return nil, fmt.Errorf("error decoding popular movies: %v", err)
     }
 
@@ -60,7 +61,7 @@ func (c *MovieApiClient) GetPopularMovies() ([]MovieModel, error) {
 
 func (c *MovieApiClient) GetHighRateMovies() ([]MovieModel, error) {
     // Send the request
-    resp, err := c.HTTPClient.Get(c.BaseURL + "/movie_server/top_rate")
+    resp, err := c.HTTPClient.Get(c.BaseURL + "/top_rate")
     if err != nil {
         return nil, fmt.Errorf("error fetching high-rate movies: %v", err)
     }

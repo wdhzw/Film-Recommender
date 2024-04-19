@@ -1,31 +1,28 @@
 package http
 
 import (
-    "encoding/json"
     "net/http"
-
     "recommendation_server/internal/recommendation/usecase"
+    "github.com/gin-gonic/gin"
 )
 
-func RecommendationHandler(uc *usecase.RecommendationUsecase) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        // Extract user email from request body
-        var req struct {
-            Email string `json:"email"`
-        }
-        if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-            http.Error(w, "invalid request body", http.StatusBadRequest)
+func RecommendationHandler(uc *usecase.RecommendationUsecase) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        // Extract user email from query parameters
+        email := c.Query("email")
+        if email == "" {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "email is required"})
             return
         }
 
         // Generate personalized recommendations
-        recommendedMovies, err := uc.GeneratePersonalizedRecommendations(req.Email)
+        recommendedMovies, err := uc.GeneratePersonalizedRecommendations(email)
         if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
             return
         }
 
         // Return the recommended movies as JSON response
-        json.NewEncoder(w).Encode(recommendedMovies)
+        c.JSON(http.StatusOK, recommendedMovies)
     }
 }
