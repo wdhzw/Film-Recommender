@@ -14,7 +14,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(gin.Recovery(), middleware.CORSMiddleware())
+	r.Use(middleware.PanicMiddleware(), middleware.CORSMiddleware())
 
 	r.GET("/movie_server/:movie_id", service.GetMovieDetailsById)
 	r.GET("/movie_server/popular", service.GetPopularMovies)
