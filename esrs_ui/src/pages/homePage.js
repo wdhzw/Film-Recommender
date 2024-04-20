@@ -1,15 +1,17 @@
-import React, {useContext} from 'react';
-import { Link } from 'react-router-dom';
+import React, {useContext, useEffect} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
 import {AuthContext} from "../hooks/AuthContext";
 
 const HomePage = () => {
     const { logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        navigate("/login")
+    }, []);
+
     return (
-    <div>
-      <h1>Home Page</h1>
-      <Link to="/login">Login</Link> | <Link to="/dashboard">Dashboard</Link>
-        <button onClick={logout}>Logout</button>
-    </div>
+    <div></div>
     );
 };
 
