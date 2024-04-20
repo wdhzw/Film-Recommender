@@ -1,0 +1,99 @@
+.App {
+  text-align: center;
+  margin: auto 20px;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+}
+
+.ant-modal-title {
+  text-align: center;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.site-layout-content {
+  background: #fff;
+  padding: 24px;
+  margin: 0 auto;
+  min-height: 280px;
+  max-width: 1200px;
+}
+
+.logo {
+  width: 120px;
+  height: 31px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px 24px 16px 0;
+  float: left;
+}
+
+.ant-breadcrumb {
+  margin: 16px 0;
+}
+
+.ant-layout-content {
+  padding: 50px;
+}
+
+.ant-rate {
+  padding: 10px 0;
+}
+
+.ant-card-bordered {
+  border: 1px solid #ebedf0;
+}
+
+.ant-btn-primary {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .site-layout-content {
+    padding: 0;
+  }
+}
+
