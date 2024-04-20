@@ -1,6 +1,8 @@
 const userURL = `http://ec2-44-217-97-83.compute-1.amazonaws.com:8080/api/`
 const movieURL = `http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/`
 const searchURL = `http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/search`
+const recommendURL = `http://recommendation-service-env.eba-p8im7vcj.us-east-1.elasticbeanstalk.com/recommendations`
+
 
 const login = async (username, email, pwd) => {
     const headers = new Headers();
@@ -197,6 +199,30 @@ const searchMovie = async(keywords) => {
     }
 }
 
+const getRecommendations = async (email, pageID) => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Accept", "*/*")
+    headers.append("Accept-Encoding", "gzip, deflate, br")
+
+    try {
+        const response = await fetch(recommendURL + "?email=" + email + "&page=" + pageID, {
+            method: 'GET',
+            headers: headers,
+        })
+        if (response.ok) {
+            return await response.json()
+        } else {
+            console.error('Get recommendation list failed', await response.text())
+            return null
+        }
+    } catch (error) {
+        console.error('Error:', error)
+        return null
+    }
+}
+
+
 export {
     login,
     getUserInfo,
@@ -205,4 +231,5 @@ export {
     confirmSignUp,
     getMovieDetail,
     searchMovie,
+    getRecommendations,
 }

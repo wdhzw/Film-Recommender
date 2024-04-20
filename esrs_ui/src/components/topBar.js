@@ -73,7 +73,7 @@ function TopBar({username, currentPage}) {
                     : null
             }
             <h1 style={fixedWelcome}>
-                Welcome {username}! <br/><br/>
+                Welcome {username}! <br/>
                 {currentPage}
             </h1>
         </div>
