@@ -4,6 +4,7 @@ import (
 	"CS5224_ESRS/recommendation_server/internal/recommendation/usecase"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 func RecommendationHandler(uc *usecase.RecommendationUsecase) gin.HandlerFunc {
@@ -11,12 +12,20 @@ func RecommendationHandler(uc *usecase.RecommendationUsecase) gin.HandlerFunc {
 		// Extract user email from query parameters
 		email := c.Query("email")
 		if email == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "email is required"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Email is required"})
+			return
+		}
+
+		// Extract page number from query parameters
+		page := c.DefaultQuery("page", "1") // Default to page 1 if not specified
+		pageNumber, err := strconv.Atoi(page)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
 			return
 		}
 
 		// Generate personalized recommendations
-		recommendedMovies, err := uc.GeneratePersonalizedRecommendations(email)
+		recommendedMovies, err := uc.GeneratePersonalizedRecommendations(email, pageNumber)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
