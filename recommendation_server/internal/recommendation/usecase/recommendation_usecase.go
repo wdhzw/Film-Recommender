@@ -52,7 +52,7 @@ func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email strin
 
 	movies := make(map[int64]*Item, 0)
 	for _, popularMovie := range popularMovies {
-		mid := popularMovie.MovieID
+		mid := popularMovie.MovieId
 
 		if _, ok := movies[mid]; !ok {
 			movies[mid] = &Item{
@@ -61,8 +61,7 @@ func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email strin
 			}
 		}
 
-		movieGenre := popularMovie.Genres
-		movieGenres := strings.Split(movieGenre, ",")
+		movieGenres := popularMovie.Genres
 
 		for _, g := range movieGenres {
 			if _, ok := preferenceSet[g]; ok {
@@ -72,7 +71,7 @@ func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email strin
 	}
 
 	for _, rateMovie := range highRateMovies {
-		mid := rateMovie.MovieID
+		mid := rateMovie.MovieId
 
 		if _, ok := movies[mid]; !ok {
 			movies[mid] = &Item{
@@ -83,8 +82,7 @@ func (uc *RecommendationUsecase) GeneratePersonalizedRecommendations(email strin
 			movies[mid].Score += rateMovie.Rate
 		}
 
-		movieGenre := rateMovie.Genres
-		movieGenres := strings.Split(movieGenre, ",")
+		movieGenres := rateMovie.Genres
 
 		for _, g := range movieGenres {
 			if _, ok := preferenceSet[g]; ok {
