@@ -110,7 +110,7 @@ zip recommend.zip application Procfile
 There will be a zipped file named as recommend.zip, the rest of steps are the same as the other two services above.
 
 ### Movie Service
-This module conprises of movie server, movie timer, movie database and a NAT gateway for accessing the public networks.
+This module comprises movie server, movie timer, movie database and a NAT gateway for accessing the public networks.
 
 #### Movie Database
 Due to the model entity of movies, we select relational database and use `MYSQL` as engine.
