@@ -1,6 +1,6 @@
 const userURL = `http://ec2-44-217-97-83.compute-1.amazonaws.com:8080/api/`
-const movieURL = `http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/`
-const searchURL = `http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/search`
+const movieURL = `http://cs5224-movie-service.us-east-1.elasticbeanstalk.com/movie_server/`
+const searchURL = `http://cs5224-movie-service.us-east-1.elasticbeanstalk.com/movie_server/search`
 const recommendURL = `http://recommendation-service-env.eba-p8im7vcj.us-east-1.elasticbeanstalk.com/recommendations`
 
 

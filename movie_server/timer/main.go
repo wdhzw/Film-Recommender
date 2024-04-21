@@ -90,7 +90,7 @@ func fetchMovies(ctx context.Context) (string, error) {
 						continue
 					}
 
-					resp, err := http.Get(fmt.Sprintf("http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/%d", movieId))
+					resp, err := http.Get(fmt.Sprintf("http://cs5224-movie-service.us-east-1.elasticbeanstalk.com/movie_server/%d", movieId))
 					if err != nil {
 						log.Printf("[GetMovieInfo] failed, err:%s", err)
 						continue
@@ -199,7 +199,7 @@ func fetchMovies(ctx context.Context) (string, error) {
 						createReq.Keywords = keywords
 
 						createReqStr, _ := json.Marshal(createReq)
-						_, err = http.Post("http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/create", "application/json", bytes.NewBuffer(createReqStr))
+						_, err = http.Post("http://cs5224-movie-service.us-east-1.elasticbeanstalk.com/movie_server/create", "application/json", bytes.NewBuffer(createReqStr))
 						if err != nil {
 							log.Println("[movie server] Create Movie Api Failed, err:%s", err)
 							continue
@@ -211,7 +211,7 @@ func fetchMovies(ctx context.Context) (string, error) {
 							Rate:       strconv.FormatFloat(float64(movie.VoteAverage), 'f', -1, 64),
 						}
 						updateReqStr, _ := json.Marshal(updateReq)
-						_, err := http.Post("http://cs5224-movie-service-env.eba-ptufih3p.us-east-1.elasticbeanstalk.com/movie_server/update", "application/json", bytes.NewBuffer(updateReqStr))
+						_, err := http.Post("http://cs5224-movie-service.us-east-1.elasticbeanstalk.com/movie_server/update", "application/json", bytes.NewBuffer(updateReqStr))
 						if err != nil {
 							log.Println("[movie server] Update Movie Api Failed, err:%s", err)
 							continue
