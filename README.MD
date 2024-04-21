@@ -37,3 +37,37 @@ pip install -r requirements.txt
 python app.py
 ```
 The UI Service will be running on port 8081
+
+### USER SERVICE
+The implementation of user service consists of api handlers, client layers and dao layers.
+The service replies on two additional AWS services: AWS Cognito and AWS DynamoDB.
+
+#### USER SERVICE AWS Cognito AWS Development
+Heading to AWS Cognito page and create new user pool, select `User name` and `email` as sign-in options
+![img_1.png](snapshots/sign_in_setting.png)
+Choose `NO MFA`
+![img_2.png](snapshots/mfa_setting.png)
+Choose `Send email with Cognito`
+![img_3.png](snapshots/email_setting.png)
+Once user pool is created, clicks the newly created user pool and select App integration. Copy the Client ID and paste the value in the `conf/conf.yml file`
+![img_4.png](snapshots/user_pool.png)
+![img_5.png](snapshots/app_client_id.png)
+![img_6.png](snapshots/conf.png)
+
+#### USER SERVICE DynamoDB AWS Development
+Enter the table name and use `user_id` as the partition key.
+![img.png](snapshots/dynamodb.png)
+
+#### USER SERVICE EC2 Instance AWS Development
+We could utilize Elastic Beanstalk to deploy the user service. Execute commands
+```
+cd user_server
+zip -r user.zip *
+```
+There will be a zipped file named as user.zip
+![img_1.png](snapshots/beanstalk_platform.png)
+Select golang as the platform, upload the zipped file as the application code
+![img_2.png](snapshots/instance_setting.png)
+Make sure Public IP address is activated
+
+Once the Elastic Beanstalk environment is created, make sure the corresponding EC2 instance is initiated successfully.
