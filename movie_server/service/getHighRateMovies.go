@@ -16,6 +16,7 @@ type TopRateMovieItem struct {
 	ReleaseDate time.Time `json:"release_date"`
 	Duration    int       `json:"duration"`
 	Keywords    []string  `json:"keywords"`
+	PosterURL   string    `json:"poster_uri"`
 }
 
 func packTopRateMovieItem(model *model.MovieModel) *TopRateMovieItem {
@@ -27,6 +28,7 @@ func packTopRateMovieItem(model *model.MovieModel) *TopRateMovieItem {
 		ReleaseDate: model.ReleaseDate,
 		Duration:    model.Duration,
 		Keywords:    utils.SplitSeries(model.Keyword),
+		PosterURL:   utils.FillURI(model.PosterURI),
 	}
 }
 

@@ -16,6 +16,7 @@ type PopularMovieItem struct {
 	ReleaseDate time.Time `json:"release_date"`
 	Duration    int       `json:"duration"`
 	Keywords    []string  `json:"keywords"`
+	PosterURL   string    `json:"poster_uri"`
 }
 
 func packPopularMovieItem(model *model.MovieModel) *PopularMovieItem {
@@ -27,6 +28,7 @@ func packPopularMovieItem(model *model.MovieModel) *PopularMovieItem {
 		ReleaseDate: model.ReleaseDate,
 		Duration:    model.Duration,
 		Keywords:    utils.SplitSeries(model.Keyword),
+		PosterURL:   utils.FillURI(model.PosterURI),
 	}
 }
 
