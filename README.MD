@@ -5,6 +5,18 @@ In a time of plentiful entertainment options, our SaaS aims to simplify the movi
 process, enhance user satisfaction, and drive engagement by offering tailored recommendations
 that match individual tasted and preferences.
 
+## Table of Contents
+- [Overview](#overview)
+- [UI Service](#ui-service)
+  - [UI Development](#ui-development)
+  - [UI Deploy](#ui-deploy)
+- [User Service](#user-service)
+  - [User Service AWS Cognito Development](#user-service-aws-cognito-development)
+  - [User Service AWS DynamoDB Development](#user-service-aws-dynamodb-development)
+  - [User Service AWS EC2 Instance Development](#user-service-aws-ec2-instance-development)
+- [Recommendation Service](#recommendation-service)
+  - [Recommendation Service AWS EC2 Instance Development](#recommendation-service-aws-ec2-instance-development)
+
 ### Overview
 ![FM](./snapshots/FM.png)
 
