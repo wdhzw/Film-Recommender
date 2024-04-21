@@ -1,0 +1,10 @@
+.ant-list-items {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.ant-list-item {
+  display: inline-flex;
+  flex: none;
+}

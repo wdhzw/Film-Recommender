@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # resp = rds_client.describe_db_instances(DBInstanceIdentifier='cs5224-movie')
 
     db_conn = pymysql.connect(
-        host='cs5224-movie-meta.c3o8o8eyqv2b.us-east-1.rds.amazonaws.com',
+        host='cs5224-movie.ch9epm31kopc.us-east-1.rds.amazonaws.com',
         port=3306,
         user='guohaonan',
         password='ghn980421',
