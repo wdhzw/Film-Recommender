@@ -79,3 +79,15 @@ Select golang as the platform, upload the zipped file as the application code
 Make sure Public IP address is activated.
 
 Once the Elastic Beanstalk environment is created, check if the corresponding EC2 instance is initiated successfully.
+
+### Recommendation Service
+The implementation of recommendation service consists of api handlers, user/movie clients and recommendation algorithm.
+
+#### Recommendation Service AWS EC2 Instance Development
+Similar to User service and Movie Service, we also use Elastic Beanstalk to deploy the recommendation service. Execute commands
+```
+cd recommendation_server
+GOOS=linux GOARCH=amd64 go build -o application
+zip recommend.zip application Procfile
+```
+There will be a zipped file named as recommend.zip, the rest of steps are the same as the other two services above.
